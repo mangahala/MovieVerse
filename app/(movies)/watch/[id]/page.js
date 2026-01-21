@@ -46,7 +46,7 @@ const Watch = async ({ params, searchParams }) => {
 
           <div className="mt-20 flex gap-44">
             <MovieInfos info={MovieInfo} />
-            {/* <Rating info={MovieInfo} /> */}
+            <Rating info={MovieInfo} />
           </div>
 
           <div className="flex mb-5 gap-5 max-[1125px]:flex-col mt-24">
