@@ -1,40 +1,56 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useWatchContext } from "@/context/Watch";
 import clsx from "clsx";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 
 const EpisodeCard = ({ info, currentEp, loading, watchedEP, posterImg }) => {
-
   const { setEpisode, season } = useWatchContext();
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const [errorLoadingImage, setErrorLoadingImage] = useState(false)
+  const [errorLoadingImage, setErrorLoadingImage] = useState(false);
 
   useEffect(() => {
-    setErrorLoadingImage(false)
-  }, [season])
+    setErrorLoadingImage(false);
+  }, [season]);
 
+  const episodeNumber = info?.episode_number;
 
-  const handleClick = useCallback(() => {
-    const updateSortInUrl = (episodeNumber) => {
+  const updateSortInUrl = useCallback(
+    (episodeNumber) => {
       const updatedParams = new URLSearchParams(searchParams);
+
       if (episodeNumber) {
         updatedParams.set("ep", episodeNumber);
       } else {
         updatedParams.delete("ep");
       }
 
-      const newUrl = `${window.location.pathname}${updatedParams.toString() ? `?${updatedParams}` : ""}`;
-      router.push(newUrl, { scroll: false });
-    };
+      const newUrl = `${window.location.pathname}${updatedParams.toString() ? `?${updatedParams}` : ""
+        }`;
 
-    if (info?.episode_number) {
-      setEpisode(info.episode_number);
-      updateSortInUrl(info.episode_number);
-    }
-  }, [info?.episode_number, setEpisode, searchParams, router]);
+      router.push(newUrl, { scroll: false });
+    },
+    [router, searchParams]
+  );
+
+  const handleClick = useCallback(() => {
+    if (!episodeNumber) return;
+
+    setEpisode(episodeNumber);
+    updateSortInUrl(episodeNumber);
+  }, [episodeNumber, setEpisode, updateSortInUrl]);
+
+  const isCurrentEpisode = useMemo(
+    () => currentEp === episodeNumber,
+    [currentEp, episodeNumber]
+  );
+
+  const isWatched = useMemo(
+    () => watchedEP?.includes(episodeNumber),
+    [watchedEP, episodeNumber]
+  );
 
   if (loading) {
     return (
@@ -50,15 +66,12 @@ const EpisodeCard = ({ info, currentEp, loading, watchedEP, posterImg }) => {
     );
   }
 
-  const isCurrentEpisode = currentEp === info?.episode_number;
-  const isWatched = watchedEP?.includes(info?.episode_number);
-
   return (
     <div
       className={clsx(
         "flex gap-3 py-2 border-2 border-[#21232e] rounded-md cursor-pointer group",
         {
-          "bg-[#242430]": isCurrentEpisode,
+          "bg-[#333345]": isCurrentEpisode,
           "bg-[#1f1f28]": !isCurrentEpisode && !isWatched,
           "bg-[#2a2a38] hover:bg-[#1c1c26]": isWatched,
           "hover:bg-[#242430]": !isCurrentEpisode,
@@ -68,8 +81,9 @@ const EpisodeCard = ({ info, currentEp, loading, watchedEP, posterImg }) => {
     >
       <div className="w-full max-w-[150px] relative">
         <Image
-          src={`https://image.tmdb.org/t/p/w250_and_h141_bestv2${!errorLoadingImage ? info?.still_path : posterImg}`}
-          alt={`Episode ${info?.episode_number}`}
+          src={`https://image.tmdb.org/t/p/w250_and_h141_bestv2${!errorLoadingImage ? info?.still_path : posterImg
+            }`}
+          alt={`Episode ${episodeNumber}`}
           width={150}
           height={100}
           onError={() => setErrorLoadingImage(true)}
@@ -79,15 +93,13 @@ const EpisodeCard = ({ info, currentEp, loading, watchedEP, posterImg }) => {
           {info?.runtime || 24}m
         </div>
       </div>
+
       <div className="w-full pr-1">
         <div className="text-slate-200 break-words overflow-hidden text-ellipsis line-clamp-2 font-['Poppins'] text-sm">
-          {
-            info?.name ||
-            "No title available"
-          }
+          {info?.name || "No title available"}
         </div>
         <div className="text-[#ffffffa3] font-['Poppins'] text-[14px]">
-          Episode {info?.episode_number}
+          Episode {episodeNumber}
         </div>
       </div>
     </div>
