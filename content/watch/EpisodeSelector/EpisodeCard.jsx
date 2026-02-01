@@ -4,8 +4,15 @@ import clsx from "clsx";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 
-const EpisodeCard = ({ info, currentEp, loading, watchedEP, posterImg }) => {
-  const { setEpisode, season } = useWatchContext();
+const EpisodeCard = ({
+  info,
+  currentEp,
+  loading,
+  watchedEP,
+  posterImg,
+  currentSn,
+}) => {
+  const { season } = useWatchContext();
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -16,10 +23,18 @@ const EpisodeCard = ({ info, currentEp, loading, watchedEP, posterImg }) => {
   }, [season]);
 
   const episodeNumber = info?.episode_number;
+  const seasonNumber = info?.season_number;
 
-  const updateSortInUrl = useCallback(
-    (episodeNumber) => {
-      const updatedParams = new URLSearchParams(searchParams);
+  // ✅ Update both season & episode in URL
+  const updateParamsInUrl = useCallback(
+    (seasonNumber, episodeNumber) => {
+      const updatedParams = new URLSearchParams(searchParams.toString());
+
+      if (seasonNumber) {
+        updatedParams.set("se", seasonNumber);
+      } else {
+        updatedParams.delete("se");
+      }
 
       if (episodeNumber) {
         updatedParams.set("ep", episodeNumber);
@@ -27,23 +42,21 @@ const EpisodeCard = ({ info, currentEp, loading, watchedEP, posterImg }) => {
         updatedParams.delete("ep");
       }
 
-      const newUrl = `${window.location.pathname}${updatedParams.toString() ? `?${updatedParams}` : ""
-        }`;
-
-      router.push(newUrl, { scroll: false });
+      router.push(
+        `${window.location.pathname}?${updatedParams.toString()}`,
+        { scroll: false }
+      );
     },
     [router, searchParams]
   );
 
   const handleClick = useCallback(() => {
-    if (!episodeNumber) return;
-
-    setEpisode(episodeNumber);
-    updateSortInUrl(episodeNumber);
-  }, [episodeNumber, setEpisode, updateSortInUrl]);
+    if (!episodeNumber || !seasonNumber) return;
+    updateParamsInUrl(seasonNumber, episodeNumber);
+  }, [episodeNumber, seasonNumber, updateParamsInUrl]);
 
   const isCurrentEpisode = useMemo(
-    () => currentEp === episodeNumber,
+    () => (currentEp === episodeNumber) && currentSn === seasonNumber,
     [currentEp, episodeNumber]
   );
 
@@ -89,17 +102,18 @@ const EpisodeCard = ({ info, currentEp, loading, watchedEP, posterImg }) => {
           onError={() => setErrorLoadingImage(true)}
           className="object-cover w-full h-[82px] rounded-md"
         />
+
         <div className="text-[#ffffffe0] absolute bottom-1 right-1 bg-[#262233d4] px-1 rounded-lg text-[15px]">
           {info?.runtime || 24}m
         </div>
       </div>
 
       <div className="w-full pr-1">
-        <div className="text-slate-200 break-words overflow-hidden text-ellipsis line-clamp-2 font-['Poppins'] text-sm">
+        <div className="text-slate-200 line-clamp-2 text-sm">
           {info?.name || "No title available"}
         </div>
-        <div className="text-[#ffffffa3] font-['Poppins'] text-[14px]">
-          Episode {episodeNumber}
+        <div className="text-[#ffffffa3] text-[14px]">
+          Season {seasonNumber} · Episode {episodeNumber}
         </div>
       </div>
     </div>

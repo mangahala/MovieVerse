@@ -14,8 +14,8 @@ import MovieNotFound from "@/components/errors/MovieNotFound"
 
 
 const Watch = async ({ params, searchParams }) => {
-  const { id: MovieId } = params
-  const { media_type } = searchParams
+  const { id: MovieId } = await params;
+  const { media_type } = await searchParams
 
   const MovieInfo = await getInfoTMDB(MovieId, media_type)
 
@@ -50,7 +50,7 @@ const Watch = async ({ params, searchParams }) => {
           </div>
 
           <div className="flex mb-5 gap-5 max-[1125px]:flex-col mt-24">
-            <Comments MovieId={MovieId} title={MovieInfo?.title} />
+            <Comments MovieId={MovieId} type={MovieInfo?.type} />
             <Recommendation MovieId={MovieId} type={MovieInfo?.type} />
           </div>
 

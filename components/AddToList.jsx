@@ -29,16 +29,16 @@ const AddToList = ({ movieInfo, isMovieExists }) => {
 
     const movieData = {
       id: movieInfo?.id,
-      imdb_id: movieInfo?.imdb_id,
+      imdb_id: movieInfo?.imdb_id || movieInfo?.id,
       adult: movieInfo?.adult,
       backdrop_path: movieInfo?.backdrop_path,
       original_language: movieInfo?.original_language,
-      original_title: movieInfo?.original_title,
+      original_title: movieInfo?.original_title || movieInfo?.original_name,
       popularity: movieInfo?.popularity,
       poster_path: movieInfo?.poster_path,
-      release_date: movieInfo?.release_date,
+      release_date: movieInfo?.release_date || movieInfo?.first_air_date,
       status: movieInfo?.status,
-      title: movieInfo?.title,
+      title: movieInfo?.title || movieInfo?.name,
       type: movieInfo?.type,
     }
 
@@ -48,7 +48,6 @@ const AddToList = ({ movieInfo, isMovieExists }) => {
       setStatus_(status)
     }
   };
-
   return (
     <div className="relative">
       <div className="flex items-center gap-1 cursor-pointer" onClick={() => setIsOpened((prev) => !prev)}>

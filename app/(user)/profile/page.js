@@ -12,7 +12,6 @@ const Page = () => {
 
   const [totalMovies, setTotalMovies] = useState("loading")
 
-  // console.log(totalMovies)
 
   useEffect(() => {
     const getdata = async () => {

@@ -9,18 +9,17 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@vercel/analytics": "^1.6.1",
     "@vidstack/react": "^1.12.11",
     "axios": "^1.7.2",
-    "cheerio": "^1.0.0",
     "clsx": "^2.1.1",
     "crypto-js": "^4.2.0",
-    "disqus-react": "^1.1.5",
     "firebase": "^11.2.0",
     "framer-motion": "^11.3.8",
     "hls.js": "^1.5.15",
     "http-proxy": "^1.18.1",
     "http-proxy-middleware": "^3.0.2",
-    "next": "^14.2.23",
+    "next": "^16.1.6",
     "next-nprogress-bar": "^2.3.13",
     "react": "^18",
     "react-dom": "^18",
@@ -30,8 +29,8 @@
     "sharp": "^0.33.4"
   },
   "devDependencies": {
-    "eslint": "^8",
-    "eslint-config-next": "14.2.4",
+    "eslint": "^9.39.2",
+    "eslint-config-next": "^16.1.6",
     "postcss": "^8",
     "tailwindcss": "^3.4.1"
   }

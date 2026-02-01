@@ -12,43 +12,53 @@ const categories = [
 
 
 export const addMovie = async (uid, movie, isAuthenticated, status) => {
-  if (!isAuthenticated) {
-    toast.error("❌ You lack the required authentication! Log in to inscribe your saga.");
-    throw new Error("User is not authenticated. Please log in to add a post.");
-  }
-
-  if (!uid || !movie || !movie.id) {
-    toast.warn("⚠️ An unknown force prevents the movie from being recorded! Check your data.");
-    throw new Error("Invalid movie data or missing user ID.");
-  }
-
-  const category = categories.find((c) => c.id === status);
-  if (!category) {
-    toast.warn("⚠️ Invalid status selected! Please choose a valid category.");
-    throw new Error("Invalid status category.");
-  }
-
-  const existingMovie = await findMovieFromCollection(uid, movie.id);
-  if (existingMovie) {
-    await deleteDoc(doc(db, "savedMovies", uid, existingMovie.status, movie.id.toString()));
-  }
-
-  const movieDataSave = {
-    uid,
-    ...movie,
-    status: category.id,
-    createdAt: serverTimestamp(),
-  };
-
-  return toast.promise(
-    setDoc(doc(db, "savedMovies", uid, category.id, movie.id.toString()), movieDataSave),
-    {
-      pending: "⏳ Adding movie to your collection...",
-      success: `🎉 The movie has been added to your '${category.title}' list!`,
-      error: "🔥 A dark force has intervened! The movie could not be saved."
+  try {
+    if (!isAuthenticated) {
+      toast.error("❌ You lack the required authentication! Log in to inscribe your saga.");
+      return { success: false };
     }
-  );
+
+    if (!uid || !movie || !movie.id) {
+      toast.warn("⚠️ An unknown force prevents the movie from being recorded! Check your data.");
+      return { success: false };
+    }
+
+    const category = categories.find((c) => c.id === status);
+    if (!category) {
+      toast.warn("⚠️ Invalid status selected! Please choose a valid category.");
+      return { success: false };
+    }
+
+    const existingMovie = await findMovieFromCollection(uid, movie.id);
+    if (existingMovie) {
+      await deleteDoc(doc(db, "savedMovies", uid, existingMovie.status, movie.id.toString()));
+    }
+
+    const movieDataSave = {
+      uid,
+      ...movie,
+      status: category.id,
+      createdAt: serverTimestamp(),
+    };
+
+    await toast.promise(
+      setDoc(doc(db, "savedMovies", uid, category.id, movie.id.toString()), movieDataSave),
+      {
+        pending: "⏳ Adding movie to your collection...",
+        success: `🎉 The movie has been added to your '${category.title}' list!`,
+        error: "🔥 A dark force has intervened! The movie could not be saved."
+      }
+    );
+
+    // ✅ success
+    return { success: true };
+
+  } catch (error) {
+    console.error("Add movie error:", error);
+    return { success: false };
+  }
 };
+
 
 
 export const findMovieFromCollection = async (uid, movieId) => {

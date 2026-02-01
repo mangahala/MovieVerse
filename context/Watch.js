@@ -3,129 +3,100 @@
 import { getEpisodes } from '@/lib/TVfunctions';
 import { saveWatchProgress } from '@/utils/ProgressHandler';
 import { useSearchParams } from 'next/navigation';
-import { createContext, useContext, useEffect, useState, useMemo } from 'react';
+import { createContext, useContext, useEffect, useState, useMemo, useRef } from 'react';
 import { toast } from 'react-toastify';
 
-export const WatchAreaContext = createContext();
+export const WatchAreaContext = createContext(null);
 
 export function WatchAreaContextProvider({ children, MovieInfo, MovieId }) {
-  const searchparam = useSearchParams()
+  const searchparam = useSearchParams();
 
-  const [episode, setEpisode] = useState(parseInt(searchparam.get('ep')) || 1);
-  const [season, setSeason] = useState(parseInt(searchparam.get('se')) || 1)
+  const [episode, setEpisode] = useState(() => parseInt(searchparam.get('ep')) || 1);
+  const [season, setSeason] = useState(() => parseInt(searchparam.get('se')) || 1);
+  const [episodes, setEpisodes] = useState([]);
+  const [episodeLoading, setEpisodeLoading] = useState(true);
   const [watchInfo, setWatchInfo] = useState({ loading: true });
-  const [episodes, setEpisodes] = useState([])
 
-  const [episodeLoading, setEpisodeLoading] = useState(true)
 
+  // ---------------- SYNC WITH SEARCH PARAMS ----------------
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const watchdata = episodes.find(item => item.episode_number === episode)
+    const ep = parseInt(searchparam.get('ep')) || 1;
+    const se = parseInt(searchparam.get('se')) || 1;
 
-        setWatchInfo(prev => ({ ...prev, watchdata }))
-      } catch (error) {
-        handleError(error, isMounted);
-      }
-    };
-
-    if (MovieInfo?.type !== "tv") {
-      fetchData()
-    };
+    setEpisode(ep);
+    setSeason(se);
+  }, [searchparam]);
 
 
-  }, [episode]);
-
+  // ---------------- FETCH EPISODES ----------------
   useEffect(() => {
+    if (!MovieInfo) return;
 
+    setEpisodeLoading(true);
 
-    if (episodes.length !== 0) {
-      saveWatchProgress(MovieInfo, episodes, episode, season)
-    }
-  }, [episode, episodes])
-
-  useEffect(() => {
-    if (!MovieInfo) return; // Early return if MovieInfo is not available
-
-    setEpisodeLoading(true); // Start loading state
-
-    if (MovieInfo.type !== "tv") {
-      const sampleData = [{
+    if (MovieInfo.type !== 'tv') {
+      const movieEpisode = [{
         episode_number: 1,
         name: MovieInfo.title,
         overview: MovieInfo.overview,
-        runtime: 86,
+        runtime: MovieInfo.runtime || 90,
         season_number: 1,
         still_path: MovieInfo.backdrop_path,
       }];
 
-      setEpisodes(sampleData);
-      setEpisodeLoading(false); // Stop loading state
+      setEpisodes(movieEpisode);
+      setEpisodeLoading(false);
       return;
     }
 
-    const fetchData = async () => {
+    const fetchEpisodes = async () => {
       try {
-        const episodeData = await getEpisodes(MovieId, season);
-
-        if (!episodeData) {
-          handleNoEpisodeFound();
-          setEpisodeLoading(false); // Stop loading state
-          return;
+        const data = await getEpisodes(MovieId, season);
+        if (!data?.episodes?.length) {
+          toast('No episodes found');
+          setEpisodes([]);
+        } else {
+          setEpisodes(data.episodes);
         }
-
-        setEpisodes(episodeData.episodes);
-      } catch (error) {
-        handleError(error);
+      } catch (err) {
+        console.error(err);
+        toast('Failed to fetch episodes');
       } finally {
-        setEpisodeLoading(false); // Stop loading state in either case
+        setEpisodeLoading(false);
       }
     };
 
-    fetchData();
+    fetchEpisodes();
   }, [MovieInfo, MovieId, season]);
 
 
-
-
-
-  const handleNoEpisodeFound = () => {
-    setWatchInfo({ loading: false });
-    toast(`No episodes found`);
-  };
-
-  const handleError = (error, isMounted) => {
-    console.error('Failed to fetch watch data:', error);
-    if (isMounted) {
-      setWatchInfo({ loading: false, error: 'Failed to fetch data' });
-      toast('Failed to fetch data');
+  // ---------------- SAVE PROGRESS ----------------
+  useEffect(() => {
+    if (episodes.length && MovieInfo) {
+      saveWatchProgress(MovieInfo, episodes, episode, season);
     }
-  };
+  }, [episode, season, episodes, MovieInfo]);
 
+  // ---------------- CONTEXT VALUE ----------------
   const contextValue = useMemo(() => ({
     episode,
-    watchInfo,
-    setWatchInfo,
     setEpisode,
-    episodes,
-    MovieInfo,
-    MovieId,
     season,
     setSeason,
+    episodes,
+    watchInfo,
+    setWatchInfo,
     episodeLoading,
-    setEpisodeLoading
+    MovieInfo,
+    MovieId,
   }), [
     episode,
-    watchInfo,
-    setWatchInfo,
-    setEpisode,
+    season,
     episodes,
+    watchInfo,
+    episodeLoading,
     MovieInfo,
     MovieId,
-    season,
-    setSeason,
-    episodeLoading,
-    setEpisodeLoading
   ]);
 
   return (
@@ -136,5 +107,7 @@ export function WatchAreaContextProvider({ children, MovieInfo, MovieId }) {
 }
 
 export function useWatchContext() {
-  return useContext(WatchAreaContext);
+  const ctx = useContext(WatchAreaContext);
+  if (!ctx) throw new Error('useWatchContext must be used inside WatchAreaContextProvider');
+  return ctx;
 }

@@ -114,7 +114,7 @@ const SearchResults = ({ searchValue, setIsSearchBoxOpen, setSearchValue }) => {
 
   return (
     <motion.div
-      className="bg-[#231f2c] rounded-b-md w-full absolute flex flex-col gap-2 pb-1 border-x border-b border-[#ffffff24]"
+      className="bg-[#231f2c] rounded-b-md w-full absolute flex flex-col gap-2 z-30 pb-1 border-x border-b border-[#ffffff24]"
       variants={containerVariants}
       initial="hidden"
       animate="show"

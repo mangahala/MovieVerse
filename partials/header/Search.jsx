@@ -19,7 +19,7 @@ const Search = () => {
   }, []);
 
   if (!hasMounted) {
-    return null; // or a loader/spinner
+    return null;
   }
 
   if (width <= 590) {
@@ -73,8 +73,8 @@ const Search = () => {
 
   return (
     <div className="relative w-full">
-      <div className="flex items-center text-white bg-[#231f2c] px-4 py-1 gap-2 rounded-md h-10">
-        <div className="text-xl">
+      <div className="flex z-10 relative items-center text-white bg-[#231f2c] px-4 py-1 gap-2 rounded-md h-10">
+        <div className="text-xl ">
           <IoIosSearch />
         </div>
 
@@ -93,6 +93,7 @@ const Search = () => {
       </div>
 
       {searchValue !== "" && <SearchResults searchValue={searchValue} />}
+      {searchValue !== "" && <div className="fixed top-0 left-0 w-full h-full bg-[#00000059]" onClick={() => setSearchValue("")}></div>}
     </div>
   );
 }

@@ -1,19 +1,21 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  swcMinify: true,
+
   images: {
-    domains: [
-      's4.anilist.co',
-      "i.ytimg.com",
-      'artworks.thetvdb.com',
-      'media.kitsu.io',
-      'media.kitsu.app',
-      'kitsu-production-media.s3.us-west-002.backblazeb2.com',
-      'media.themoviedb.org'
+    unoptimized: true,
+    qualities: [20, 75, 100],
+    remotePatterns: [
+      { protocol: "https", hostname: "s4.anilist.co" },
+      { protocol: "https", hostname: "i.ytimg.com" },
+      { protocol: "https", hostname: "artworks.thetvdb.com" },
+      { protocol: "https", hostname: "media.kitsu.io" },
+      { protocol: "https", hostname: "media.kitsu.app" },
+      { protocol: "https", hostname: "kitsu-production-media.s3.us-west-002.backblazeb2.com" },
+      { protocol: "https", hostname: "media.themoviedb.org" },
     ],
-    unoptimized: true
   },
+
   env: {
     TMDB_API_KEY: process.env.TMDB_API_KEY,
     RABBIT_API_KEY: process.env.RABBIT_API_KEY,
@@ -23,9 +25,8 @@ const nextConfig = {
     storageBucket: process.env.storageBucket,
     messagingSenderId: process.env.messagingSenderId,
     appId: process.env.appId,
-    measurementId: process.env.measurementId
+    measurementId: process.env.measurementId,
   },
-
 };
 
 export default nextConfig;
