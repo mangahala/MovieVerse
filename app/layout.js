@@ -4,7 +4,7 @@ import Header from "@/partials/header/Header";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { UserInfoProvider } from "@/context/UserInfoContext";
-import { Analytics } from "@vercel/analytics/react";
+import { Analytics } from "@vercel/analytics/next";
 
 const inter = Inter({ subsets: ["latin"] });
 
